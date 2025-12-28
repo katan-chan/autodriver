@@ -80,7 +80,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<"map" | "timeline" | "settings">("map");
 
   // Algorithm config state
-  const [configBandwidthScale, setConfigBandwidthScale] = useState<number>(0.01);
+  const [configBandwidthScale, setConfigBandwidthScale] = useState<number>(0.25);
   const [configPenaltyBeta, setConfigPenaltyBeta] = useState<number>(1.0);
   const [configKPaths, setConfigKPaths] = useState<number>(3);
   const [configKShortestPenalty, setConfigKShortestPenalty] = useState<number>(1000.0);
@@ -139,7 +139,7 @@ function App() {
     try {
       const response = await api.get("/config");
       const cfg = response.data;
-      setConfigBandwidthScale(cfg.bandwidth_scale ?? 0.01);
+      setConfigBandwidthScale(cfg.bandwidth_scale ?? 0.25);
       setConfigPenaltyBeta(cfg.penalty_beta ?? 1.0);
       setConfigKPaths(cfg.k_paths ?? 3);
       setConfigKShortestPenalty(cfg.k_shortest_penalty ?? 1000.0);
@@ -675,6 +675,18 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMinute, showVehicles]);
 
+  // Auto-update visualization when bandwidth scale changes
+  useEffect(() => {
+    if (routeResponse) {
+      if (currentMinute === 0) {
+        clearEdgeLoads();
+      } else if (routeResponse.edge_time_usage) {
+        updateEdgeColorsAtMinute(currentMinute);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [configBandwidthScale]);
+
   // Clear all edge loads (set usage_ratio to 0)
   const clearEdgeLoads = () => {
     const map = mapInstance.current;
@@ -834,7 +846,7 @@ function App() {
             <h1>Hanoi Road Network</h1>
             <p className="status-line">{status}</p>
             <p className="hint-line">
-              Backend: {import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}
+              Backend: {import.meta.env.VITE_API_BASE_URL || "http://118.70.128.4:8000"}
             </p>
           </div>
           <div className="tabs">

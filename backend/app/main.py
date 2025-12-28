@@ -17,7 +17,14 @@ from .algorithms import (
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(
+        app,
+        resources={r"/*": {"origins": "*"}},
+        allow_headers="*",
+        expose_headers="*",
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        supports_credentials=True
+    )
     return app
 
 
